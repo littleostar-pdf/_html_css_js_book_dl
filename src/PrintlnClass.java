@@ -68,25 +68,23 @@ public class PrintlnClass {
                             "div.file-wrap > " +
                             "table > " +
                             "tbody:eq(1) > " +
-                            "tr > " +
+                            "tr:gt(0) > " +
                             "td:eq(1) > " +
                             "span > " +
                             "a");
-            if (contentTds != null) {
+            System.out.println("size="+contentTds.size());
+
+            if (contentTds.size() > 0) {
                 Element element0 = contentTds.get(0);
                 String tempLink = getTempLink(element0);
 
-                System.out.println("####" + element0.text().substring(0, element0.text().indexOf(".")));
-                System.out.println("```");
+                System.out.println(  "- " +element0.text().substring(0, element0.text().indexOf(".")));
                 for (Element element : contentTds) {
                     String currentLink = element.attr("href").replace("blob", "raw");
 
                     if (!currentLink.contains(tempLink)) {
-                        System.out.println("```");
-                        System.out.println("---");
                         System.out.println();
-                        System.out.println("####" + element.text().substring(0, element.text().indexOf(".")));
-                        System.out.println("```");
+                        System.out.println(  "- " + element.text().substring(0, element.text().indexOf(".")));
 
                     }
                     tempLink = getTempLink(element);
@@ -103,10 +101,9 @@ public class PrintlnClass {
                     }
 //                    System.out.println(linkText);
 
-                    System.out.println("["+linkText+"]("+link+")");
+                    System.out.println("  - ["+linkText+"]("+link+")");
                 }
                 System.out.println();
-                System.out.println("```");
 
                 System.out.println();
                 System.out.println("contentTds.size()==" + contentTds.size());
