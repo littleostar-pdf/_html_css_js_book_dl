@@ -25,7 +25,7 @@ public class PrintlnClass {
     private static void printlnFileDownloadLink() throws IOException {
         String uri = "https://github.com/littleostar-pdf/__WEB_PDF";
 
-        uri = uri.concat("/tree/fix-master/file");
+        uri = uri.concat("/tree/fix-master/files");
         System.out.println("uri:\n" + uri);
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -52,43 +52,68 @@ public class PrintlnClass {
 //            System.out.println(html);
 
             Document document = Jsoup.parse(html);
+            // #js-repo-pjax-container >
+            // div.container.new-discussion-timeline.experiment-repo-nav >
+            // div.repository-content >
+            // div.file-wrap >
+            // table >
+            // tbody:nth-child(2) >
+            // tr:nth-child(2) >
+            // td.content >
+            // span
             Elements contentTds = document.select(
                     "#js-repo-pjax-container > " +
-                    "div.container.new-discussion-timeline.experiment-repo-nav > " +
-                    "div.repository-content > " +
-                    "div.file-wrap > table > " +
-                    "tbody:eq(1) > " +
-                    "tr:gt(2) > " +
-                    "td:eq(1) > " +
-                    "span > " +
-                    "a");
+                            "div.container.new-discussion-timeline.experiment-repo-nav > " +
+                            "div.repository-content > " +
+                            "div.file-wrap > " +
+                            "table > " +
+                            "tbody:eq(1) > " +
+                            "tr > " +
+                            "td:eq(1) > " +
+                            "span > " +
+                            "a");
+            if (contentTds != null) {
+                Element element0 = contentTds.get(0);
+                String tempLink = getTempLink(element0);
 
-            Element element0 = contentTds.get(0);
-            String tempLink = getTempLink(element0);
+                System.out.println("####" + element0.text().substring(0, element0.text().indexOf(".")));
+                System.out.println("```");
+                for (Element element : contentTds) {
+                    String currentLink = element.attr("href").replace("blob", "raw");
 
+                    if (!currentLink.contains(tempLink)) {
+                        System.out.println("```");
+                        System.out.println("---");
+                        System.out.println();
+                        System.out.println("####" + element.text().substring(0, element.text().indexOf(".")));
+                        System.out.println("```");
 
-            System.out.println("####"+element0.text());
-            for (Element element : contentTds) {
-                String currentLink = element.attr("href").replace("blob", "raw");
+                    }
+                    tempLink = getTempLink(element);
 
-                if (!currentLink.contains(tempLink)) {
-                    System.out.print("\n\n");
-                    System.out.println("```");
-                    System.out.println("---\n");
-                    System.out.println("```");
+                    int firstPointIndex = currentLink.indexOf(".");
+                    int secondPointIndex = currentLink.lastIndexOf(".");
+                    String link = "https://github.com" + currentLink;
 
-                    System.out.println("####"+element.text());
+                    String linkText;
+                    if (firstPointIndex == secondPointIndex){
+                        linkText = "rar";
+                    }else {
+                        linkText = currentLink.substring(firstPointIndex+1, secondPointIndex);
+                    }
+//                    System.out.println(linkText);
+
+                    System.out.println("["+linkText+"]("+link+")");
                 }
-                tempLink = getTempLink(element);
+                System.out.println();
+                System.out.println("```");
 
-                String link = "https://github.com" + currentLink;
-                System.out.println(link);
+                System.out.println();
+                System.out.println("contentTds.size()==" + contentTds.size());
+
+                EntityUtils.consume(httpEntity);
+
             }
-
-            System.out.println();
-            System.out.println("contentTds.size()=="+contentTds.size());
-
-            EntityUtils.consume(httpEntity);
         } finally {
             if (response != null) {
                 response.close();
@@ -101,9 +126,9 @@ public class PrintlnClass {
         String tempLink = element.attr("href").replace("blob", "raw");
         String k1 = ".part";
         String k2 = ".rar";
-        if (tempLink.contains(k1)){
+        if (tempLink.contains(k1)) {
             tempLink = tempLink.substring(0, tempLink.indexOf(k1));
-        }else {
+        } else {
             tempLink = tempLink.substring(0, tempLink.indexOf(k2));
         }
         return tempLink;
